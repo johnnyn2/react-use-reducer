@@ -1,23 +1,34 @@
-import logo from './logo.svg';
 import './App.css';
+import { useReducer } from 'react';
+import {postReducer, INIT_STATE} from './postReducer'
+import { ACTION_TYPES } from './actionTypes';
 
 function App() {
+  
+  const [state, dispatch] = useReducer(postReducer, INIT_STATE)
+  
+  const handleFetch = () => {
+    dispatch({ type: ACTION_TYPES.FETCH_START });
+    fetch('https://jsonplaceholder.typicode.com/posts/1')
+      .then(res => res.json())
+      .then(data => {
+        dispatch({
+          type: ACTION_TYPES.FETCH_SUCCESS,
+          payload: data,
+        });
+      })
+      .catch(err => {
+        dispatch({type: ACTION_TYPES.FETCH_ERROR});
+      })
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+      <button onClick={handleFetch}>
+        {state.loading? "Wait..." : "Fetch the post"}
+      </button>
+      <p>{state.post?.title}</p>
+      <span>{state.error && "Something went wrong!"}</span>
     </div>
   );
 }
